@@ -1,0 +1,58 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/managed-by: argocd-autopilot
+    app.kubernetes.io/name: root
+  name: root-multienv-single
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+  - group: argoproj.io
+    jsonPointers:
+    - /status
+    kind: Application
+  project: default
+  source:
+    path: "02.multienv-single/00.config"
+    repoURL: ssh://git@localhost:7999/csi/tests.git
+  syncPolicy:
+    automated:
+      allowEmpty: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - allowEmpty=true
+status:
+  health: {}
+  summary: {}
+  sync:
+    comparedTo:
+      destination: {}
+      source:
+        repoURL: ""
+    status: ""
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: userspace-git
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  url: "ssh://git@localhost:7999/csi/tests.git"
+  name: "default"
+  sshPrivateKey: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    ............... KEY ..................
+    -----END OPENSSH PRIVATE KEY-----
+
+  insecure: "true" # Do not perform a host key check for the server. Defaults to "false"
+  enableLfs: "true" # Enable git-lfs for this repository. Defaults to "false"

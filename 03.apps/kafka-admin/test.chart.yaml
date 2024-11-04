@@ -1,0 +1,22 @@
+# helm chart
+helmChartPath: 02.multienv-single/00.charts/dummy
+
+# helm values
+ingress:
+  enabled: true
+  hosts:
+    - host: nginx-test.localhost
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+config:
+  test_specific:
+    value: "test-lol"
+    source: "03.apps/kafka-admin/test.deploy.yaml"
+    order: 4
+
+  overwritten:
+    value: "value coming from integration specific file"
+    source: "03.apps/kafka-admin/test.deploy.yaml"
+    order: 4

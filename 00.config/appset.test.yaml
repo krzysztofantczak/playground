@@ -1,0 +1,49 @@
+---
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Git/
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: test-chart-micro-services
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  goTemplate: true
+  # goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        files:
+          - path: 02.multienv-single/03.apps/**/test.chart.y*ml
+        repoURL: ssh://git@localhost:7999/csi/tests.git
+        revision: 'HEAD'
+  template:
+    metadata:
+      name: "test-{{ default .path.basenameNormalized .appName }}-chart"
+    spec:
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'integration'
+      sources:
+        - repoURL: "{{ default \"ssh://git@localhost:7999/csi/tests.git\" .srcRepoURL  }}"
+          targetRevision: 'HEAD'
+          path: "{{ .helmChartPath }}"
+          helm:
+            ignoreMissingValueFiles: true
+            valueFiles:
+              - "values.local.yaml"
+              - "$values/{{ .path.path }}/../common.yaml"
+              - "$values/{{ .path.path }}/common.yaml"
+              - "$values/{{ .path.path }}/test.chart.yaml"
+
+        - repoURL: 'ssh://git@localhost:7999/csi/tests.git'
+          targetRevision: HEAD
+          # resolves to the root of the repo
+          ref: values
+
+      project: integration
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true  
+        automated:
+          prune: true
+          selfHeal: true

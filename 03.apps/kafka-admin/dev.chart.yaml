@@ -1,0 +1,27 @@
+# helm chart
+helmChartPath: 02.multienv-single/00.charts/dummy
+
+# helm values
+ingress:
+  enabled: true
+  hosts:
+    - host: nginx-dev.localhost
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+config:
+  dev_specific:
+    value: "dev-lol"
+    source: "03.apps/kafka-admin/dev.deploy.yaml"
+    order: 4
+
+  env_specific:
+    value: "dev level config"
+    source: "03.apps/kafka-admin/dev.deploy.yaml"
+    order: 4
+
+  overwritten:
+    value: "value coming from dev specific file"
+    source: "03.apps/kafka-admin/dev.deploy.yaml"
+    order: 4

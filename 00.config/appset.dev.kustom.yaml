@@ -1,0 +1,54 @@
+---
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Git/
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-kustom-micro-services
+  namespace: argocd
+#  annotations:
+#    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  goTemplate: true
+  # goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+#        directories:
+        files:
+        - path: 02.multienv-single/03.apps/**/kustomization.yaml
+#        - path: 02.multienv-single/03.apps/*
+        repoURL: ssh://git@localhost:7999/csi/tests.git
+        revision: HEAD
+  template:
+    metadata:
+      name: 'dev-{{.path.basename}}-kustomize'
+    spec:
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'development'
+      #        namespace: '{{.path.basename}}'
+      source:
+        repoURL: ssh://git@localhost:7999/csi/tests.git
+        targetRevision: HEAD
+        path: '{{.path.path}}'
+#        directory:
+#          include: 'dev.kustomize.yaml'
+#        plugin:
+#          name: kustomized-helm-v1.0
+#          env:
+#            - name: HELM_ARGS
+#              value: -f traefik-values.yaml
+
+      ignoreDifferences:
+      - group: argoproj.io
+        jsonPointers:
+        - /status
+        kind: Application
+
+      project: "development"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          allowEmpty: true
+          prune: true
+          selfHeal: true

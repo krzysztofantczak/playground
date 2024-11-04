@@ -1,0 +1,7 @@
+# These are common defaults for all apps
+
+config:
+  apps_common:
+    value: "all apps common config"
+    source: "03.apps/common.yaml"
+    order: 2

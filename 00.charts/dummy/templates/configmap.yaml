@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dummy.fullname" . }}
+data:
+  index.html: |
+    <html><head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+              color-scheme: light dark;
+              background-color: color-mix(in srgb, Canvas, CanvasText 2.5%);
+              color: color-mix(in srgb, CanvasText, Canvas 15%);
+              font-size: 16px;
+              font-family: system-ui;
+            }
+            table { width: 66%; text-align: left; }
+        </style>
+    </head><body>
+    <h1>ArgoCD + Helm variables scoping!</h1>
+
+    <table>
+        <tr><th>Variable</th><th>Order</th><th>Source</th><th>Value</th></tr>
+    {{- range $env, $value := .Values.config }}
+        {{- if and (kindIs "map" $value) (hasKey $value "order") }}
+        <tr><td>{{ $env }}</td><td>{{ $value.order }}</td><td>{{ $value.source }}</td><td>{{ $value.value }}</td></tr>
+        {{- else }}
+        <tr><td>{{ $env }}</td><td>-</td><td>-</td><td>{{ $value }}</td></tr>
+        {{- end }}
+    {{- end }}
+    </table>
+
+    <script type="text/javascript">
+        function sortTableByOrder() {
+            const table = document.querySelector("table tbody");
+            const rows = Array.from(table.rows).slice(1); // Skip the header row
+
+            rows.sort((a, b) => {
+                const orderA = parseInt(a.cells[1].innerText);
+                const orderB = parseInt(b.cells[1].innerText);
+                return orderA - orderB;
+            });
+
+            rows.forEach(row => table.appendChild(row)); // Re-append sorted rows to the table
+        }
+
+        // Call the function to sort the table
+        sortTableByOrder();
+    </script>
+
+    </body></html>

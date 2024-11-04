@@ -1,0 +1,12 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - traefik-app.yaml
+
+patches:
+  - patch: '[{"op": "replace", "path": "/spec/template/spec/containers/0/image", "value": "my/image:updated-tag"}]'
+    target:
+      kind: Deployment
+      name: test-traefik
+      namespace: integration

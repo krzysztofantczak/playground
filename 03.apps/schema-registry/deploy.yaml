@@ -1,0 +1,15 @@
+# app configuration
+helmChartPath: simple-single-tenant/00.charts/dummy-api
+
+# helm values
+image:
+  repository: traefik/whoami
+  tag: latest
+
+ingress:
+  enabled: true
+  hosts:
+    - host: whoami.localhost
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
